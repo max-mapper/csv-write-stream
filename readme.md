@@ -50,7 +50,7 @@ writer.pipe(fs.createWriteStream('out.csv'))
 writer.write(['world', 'bar'])
 writer.end()
 
-// produces: hello,foo,baz\nworld,bar,taco\n
+// produces: hello,foo\nworld,bar\n
 ```
 
 see the test suite for more examples
