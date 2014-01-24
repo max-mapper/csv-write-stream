@@ -35,6 +35,7 @@ WriteStream.prototype.serialize = function(row) {
   var str = false
   for (var i = 0; i < row.length; i++) {
     var cell = row[i]
+    if (typeof cell !== 'string') cell = cell.toString()
     var needsEscape = false
     if (cell.indexOf('"') > -1) {
       needsEscape = true
