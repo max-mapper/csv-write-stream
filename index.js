@@ -9,6 +9,10 @@ function WriteStream(opts) {
   this.headers = this.opts.headers
   this.separator = this.opts.separator || ','
   this.newline = this.opts.newline || '\n'
+  this.sendHeaders = this.opts.sendHeaders
+  if (this.sendHeaders == null) {
+    this.sendHeaders = true
+  }
   this.stream = through({objectMode: true}, this.write.bind(this))
   return this.stream
 }
@@ -22,7 +26,7 @@ WriteStream.prototype.write = function(row, enc, next) {
     }
     this.headers = Object.keys(row)
   }
-  if (!this.sentHeaders) {
+  if (this.sendHeaders && !this.sentHeaders) {
     this.stream.push(this.serialize(this.headers))
     this.sentHeaders = true
   }
