@@ -97,3 +97,15 @@ test('no headers specified', function(t) {
   writer.write(['foo', 'bar'])
   writer.end()
 })
+
+test('no headers displayed', function(t) {
+  var writer = csv({sendHeaders: false})
+
+  writer.pipe(concat(function(data) {
+    t.equal('world,bar,taco\n', data.toString())
+    t.end()
+  }))
+
+  writer.write({hello: "world", foo: "bar", baz: "taco"})
+  writer.end()
+})
