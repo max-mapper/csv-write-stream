@@ -25,11 +25,12 @@ var writer = csvWriter()
 {
   separator: ',',
   newline: '\n',
-  headers: undefined
+  headers: undefined,
+  sendHeaders: true
 }
 ```
 
-`headers` can be an array of strings to use as the header row. if you don't specify a header row the keys of the first row written to the stream will be used as the header row IF the first row is an object (see the test suite for more details)
+`headers` can be an array of strings to use as the header row. if you don't specify a header row the keys of the first row written to the stream will be used as the header row IF the first row is an object (see the test suite for more details). if the `sendHeaders` option is set to false, the headers will be used for ordering the data but will never be written to the stream.
 
 example of auto headers:
 
@@ -51,6 +52,17 @@ writer.write(['world', 'bar'])
 writer.end()
 
 // produces: hello,foo\nworld,bar\n
+```
+
+example of not sending headers:
+
+```js
+var writer = csv({sendHeaders: false})
+writer.pipe(fs.createWriteStream('out.csv'))
+writer.write({hello: "world", foo: "bar", baz: "taco"})
+writer.end()
+
+// produces: world,bar,taco\n
 ```
 
 see the test suite for more examples
