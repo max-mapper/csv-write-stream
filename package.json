@@ -6,6 +6,10 @@
   "scripts": {
     "test": "node test.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:maxogden/csv-write-stream.git"
+  },
   "author": "max ogden",
   "license": "BSD",
   "dependencies": {
