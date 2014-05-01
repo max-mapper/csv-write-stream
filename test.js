@@ -109,3 +109,18 @@ test('no headers displayed', function(t) {
   writer.write({hello: "world", foo: "bar", baz: "taco"})
   writer.end()
 })
+
+test('serialize falsy values', function (t) {
+  // see https://github.com/maxogden/csv-write-stream/issues/8#issuecomment-41873534
+  var writer = csv({
+    headers: ['boolean','string','number','null','undefined'],
+    sendHeaders: false
+  })
+  writer.pipe(concat(function (data) {
+    t.equal('false,false,0,,\n', data.toString())
+    t.end()
+  }))
+
+  writer.write([false,'false',0,null,undefined])
+  writer.end()
+})
