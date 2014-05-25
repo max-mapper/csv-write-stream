@@ -1,57 +1,82 @@
-var through = require('through2')
+var stream = require('stream')
+var util = require('util')
+var gen = require('generate-object-property')
 
-module.exports = WriteStream
-
-function WriteStream(opts) {
-  if (!(this instanceof WriteStream)) return new WriteStream(opts)
+var CsvWriteStream = function(opts) {
   if (!opts) opts = {}
-  this.opts = opts
-  this.headers = this.opts.headers
-  this.separator = this.opts.separator || ','
-  this.newline = this.opts.newline || '\n'
-  this.sendHeaders = this.opts.sendHeaders
-  if (this.sendHeaders == null) {
-    this.sendHeaders = true
-  }
-  this.stream = through({objectMode: true}, this.write.bind(this))
-  return this.stream
+  stream.Transform.call(this, {objectMode:true, highWaterMark:16})
+
+  this.sendHeaders = opts.sendHeaders !== false
+  this.headers = opts.headers || null
+  this.seperator = opts.seperator || ','
+  this.newline = opts.newline || '\n'
+
+  this._objRow = null
+  this._arrRow = null
+  this._first = true
 }
 
-WriteStream.prototype.write = function(row, enc, next) {
-  if (!this.headers) {
-    if (Array.isArray(row)) {
-      this.stream.emit('error', new Error('no headers specified'))
-      next()
-      return false
-    }
-    this.headers = Object.keys(row)
-  }
-  if (this.sendHeaders && !this.sentHeaders) {
-    this.stream.push(this.serialize(this.headers))
-    this.sentHeaders = true
-  }
-  if (!Array.isArray(row)) row = this.headers.map(function(key) { return row[key] })
-  this.stream.push(this.serialize(row))
-  next()
+util.inherits(CsvWriteStream, stream.Transform)
+
+CsvWriteStream.prototype._compile = function(headers) {
+  var sep = this.seperator
+  var str = 'function toRow(obj) {\n'
+
+  if (!headers.length) str += '""'
+
+  headers = headers.map(function(prop, i) {
+    str += 'var a'+i+' = '+prop+' == null ? "" : '+prop+'\n'
+    return 'a'+i
+  })
+
+  str += 'return '
+
+  headers.forEach(function(prop, i) {
+    str += (i ? '+"'+sep+'"+' : '') + '(/['+sep+'\\r\\n"]/.test('+prop+') ? esc('+prop+') : '+prop+')'
+  })
+
+  str += '+'+JSON.stringify(this.newline)+'\n}'
+
+  return new Function('esc', 'return '+str)(esc)
 }
 
-WriteStream.prototype.serialize = function(row) {
-  var str = false
-  for (var i = 0; i < row.length; i++) {
-    var cell = row[i]
-    if (cell === null || cell === undefined) cell = ''
-    if (typeof cell !== 'string') cell = cell.toString()
-    var needsEscape = false
-    if (cell.indexOf('"') > -1) {
-      needsEscape = true
-      cell = cell.replace(/"/g, '""')
+CsvWriteStream.prototype._transform = function(row, enc, cb) {
+  var isArray = Array.isArray(row)
+
+  if (!isArray && !this.headers) this.headers = Object.keys(row)
+
+  if (this._first && this.headers) {
+    this._first = false
+
+    var objProps = []
+    var arrProps = []
+    var heads = []
+
+    for (var i = 0; i < this.headers.length; i++) {
+      arrProps.push('obj['+i+']')
+      objProps.push(gen('obj', this.headers[i]))
     }
-    if (cell.indexOf(this.separator) > -1 || cell.match(/\r?\n/)) {
-      needsEscape = true
-    }
-    if (needsEscape) cell = '"' + cell + '"'
-    if (!str) str = cell
-    else str += this.separator + cell
+
+    this._objRow = this._compile(objProps)
+    this._arrRow = this._compile(arrProps)
+
+    if (this.sendHeaders) this.push(this._arrRow(this.headers))
   }
-  return str + this.newline
+
+  if (isArray) {
+    if (!this.headers) return cb(new Error('no headers specified'))
+    this.push(this._arrRow(row))
+  } else {
+    this.push(this._objRow(row))
+  }
+
+  cb()
+}
+
+module.exports = function(opts) {
+  return new CsvWriteStream(opts)
+}
+
+function esc(cell) {
+  return '"'+cell.replace(/"/g, '""')+'"'
 }

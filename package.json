@@ -13,7 +13,7 @@
   "author": "max ogden",
   "license": "BSD",
   "dependencies": {
-    "through2": "~0.4.1"
+    "generate-object-property": "^1.0.0"
   },
   "devDependencies": {
     "tape": "~2.3.2",
