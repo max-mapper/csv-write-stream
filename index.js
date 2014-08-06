@@ -8,7 +8,7 @@ var CsvWriteStream = function(opts) {
 
   this.sendHeaders = opts.sendHeaders !== false
   this.headers = opts.headers || null
-  this.seperator = opts.seperator || ','
+  this.separator = opts.separator || opts.seperator || ','
   this.newline = opts.newline || '\n'
 
   this._objRow = null
@@ -19,7 +19,7 @@ var CsvWriteStream = function(opts) {
 util.inherits(CsvWriteStream, stream.Transform)
 
 CsvWriteStream.prototype._compile = function(headers) {
-  var sep = this.seperator
+  var sep = this.separator
   var str = 'function toRow(obj) {\n'
 
   if (!headers.length) str += '""'
