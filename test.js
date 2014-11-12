@@ -124,3 +124,16 @@ test('serialize falsy values', function (t) {
   writer.write([false,'false',0,null,undefined])
   writer.end()
 })
+
+test('handle objects and arrays', function (t) {
+  var writer = csv({sendHeaders: false})
+
+  writer.pipe(concat(function (data) {
+    t.equal(data, '1,"1,2,3",[object Object]\n')
+    t.end()
+  }))
+
+  writer.write({a: 1, b: [1,2,3], c: {d: 1}})
+  writer.end()
+
+})
