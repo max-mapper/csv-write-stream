@@ -32,7 +32,7 @@ CsvWriteStream.prototype._compile = function(headers) {
   str += 'return '
 
   headers.forEach(function(prop, i) {
-    str += (i ? '+"'+sep+'"+' : '') + '(/['+sep+'\\r\\n"]/.test('+prop+') ? esc('+prop+') : '+prop+')'
+    str += (i ? '+"'+sep+'"+' : '') + '(/['+sep+'\\r\\n"]/.test('+prop+') ? esc('+prop+'+"") : '+prop+')'
   })
 
   str += '+'+JSON.stringify(this.newline)+'\n}'
