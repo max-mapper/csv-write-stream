@@ -3,6 +3,7 @@
   "version": "0.2.2",
   "description": "A CSV encoder stream that produces properly escaped CSVs",
   "main": "index.js",
+  "bin": "cli.js",
   "scripts": {
     "test": "node test.js"
   },
@@ -13,7 +14,9 @@
   "author": "max ogden",
   "license": "BSD",
   "dependencies": {
-    "generate-object-property": "^1.0.0"
+    "generate-object-property": "^1.0.0",
+    "ldjson-stream": "^1.2.1",
+    "minimist": "^1.1.0"
   },
   "devDependencies": {
     "tape": "~2.3.2",
