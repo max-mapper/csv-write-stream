@@ -73,3 +73,13 @@ see the test suite for more examples
 $ npm install
 $ npm test
 ```
+
+### cli usage
+
+This module also includes a CLI, which you can pipe [ndjson](http://ndjson.org) 
+to stdin and it will print csv on stdout. You can install it with 
+`npm install -g csv-write-stream`.
+
+```
+cat example.ndjson | csv-write-stream > example.csv
+```
