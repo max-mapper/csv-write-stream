@@ -148,6 +148,7 @@ test('destroy with error', function (t) {
   }))
   
   writer.on('error', function (err) {
+    writer.end()
     t.equal(err.message, 'error')
   })
   

@@ -80,7 +80,7 @@ CsvWriteStream.prototype.destroy = function (err) {
   
   process.nextTick(function () {
     if(err) this.emit('error', err)
-    this.emit('end')
+    this.emit('close')
   }.bind(this))
 }
 
