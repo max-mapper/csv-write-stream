@@ -137,3 +137,21 @@ test('handle objects and arrays', function (t) {
   writer.end()
 
 })
+
+test('destroy with error', function (t) {
+  var writer = csv({sendHeaders: false})
+  
+  t.plan(2)
+  
+  writer.pipe(concat(function (data) {
+    t.equal(data, '1,2\n', 'date received')
+  }))
+  
+  writer.on('error', function (err) {
+    t.equal(err.message, 'error')
+  })
+  
+  writer.write({a: 1, b : 2})
+  writer.destroy(new Error('error'))
+  
+})

@@ -14,6 +14,7 @@ var CsvWriteStream = function(opts) {
   this._objRow = null
   this._arrRow = null
   this._first = true
+  this._destroyed = false
 }
 
 util.inherits(CsvWriteStream, stream.Transform)
@@ -71,6 +72,16 @@ CsvWriteStream.prototype._transform = function(row, enc, cb) {
   }
 
   cb()
+}
+
+CsvWriteStream.prototype.destroy = function (err) {
+  if(this._destroyed) return
+  this._destroyed = true
+  
+  process.nextTick(function () {
+    if(err) this.emit('error', err)
+    this.emit('end')
+  }.bind(this))
 }
 
 module.exports = function(opts) {
