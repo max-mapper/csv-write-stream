@@ -19,6 +19,7 @@ var CsvWriteStream = function(opts) {
 util.inherits(CsvWriteStream, stream.Transform)
 
 CsvWriteStream.prototype._compile = function(headers) {
+  var newline = this.newline
   var sep = this.separator
   var str = 'function toRow(obj) {\n'
 
@@ -29,13 +30,16 @@ CsvWriteStream.prototype._compile = function(headers) {
     return 'a'+i
   })
 
-  str += 'return '
+  for (var i = 0; i < headers.length; i += 500) { // do not overflowi the callstack on lots of cols
+    var part = headers.length < 500 ? headers : headers.slice(i, i + 500)
+    str += i ? 'result += "'+sep+'" + ' : 'var result = '
+    part.forEach(function(prop, j) {
+      str += (j ? '+"'+sep+'"+' : '') + '(/['+sep+'\\r\\n"]/.test('+prop+') ? esc('+prop+'+"") : '+prop+')'
+    })
+    str += '\n'
+  }
 
-  headers.forEach(function(prop, i) {
-    str += (i ? '+"'+sep+'"+' : '') + '(/['+sep+'\\r\\n"]/.test('+prop+') ? esc('+prop+'+"") : '+prop+')'
-  })
-
-  str += '+'+JSON.stringify(this.newline)+'\n}'
+  str += 'return result +'+JSON.stringify(newline)+'\n}'
 
   return new Function('esc', 'return '+str)(esc)
 }
