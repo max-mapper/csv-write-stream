@@ -75,13 +75,15 @@ CsvWriteStream.prototype._transform = function(row, enc, cb) {
 }
 
 CsvWriteStream.prototype.destroy = function (err) {
-  if(this._destroyed) return
+  if (this._destroyed) return
   this._destroyed = true
-  
+
+  var self = this
+
   process.nextTick(function () {
-    if(err) this.emit('error', err)
-    this.emit('close')
-  }.bind(this))
+    if (err) self.emit('error', err)
+    self.emit('close')
+  })
 }
 
 module.exports = function(opts) {
