@@ -1,6 +1,6 @@
 {
   "name": "csv-write-stream",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "description": "A CSV encoder stream that produces properly escaped CSVs",
   "main": "index.js",
   "bin": "cli.js",
