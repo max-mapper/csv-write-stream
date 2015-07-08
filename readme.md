@@ -35,7 +35,7 @@ var writer = csvWriter()
 example of auto headers:
 
 ```js
-var writer = csv()
+var writer = csvWriter()
 writer.pipe(fs.createWriteStream('out.csv'))
 writer.write({hello: "world", foo: "bar", baz: "taco"})
 writer.end()
@@ -46,7 +46,7 @@ writer.end()
 example of specifying headers:
 
 ```js
-var writer = csv({ headers: ["hello", "foo"]})
+var writer = csvWriter({ headers: ["hello", "foo"]})
 writer.pipe(fs.createWriteStream('out.csv'))
 writer.write(['world', 'bar'])
 writer.end()
@@ -57,7 +57,7 @@ writer.end()
 example of not sending headers:
 
 ```js
-var writer = csv({sendHeaders: false})
+var writer = csvWriter({sendHeaders: false})
 writer.pipe(fs.createWriteStream('out.csv'))
 writer.write({hello: "world", foo: "bar", baz: "taco"})
 writer.end()
