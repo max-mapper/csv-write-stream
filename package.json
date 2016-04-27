@@ -12,7 +12,7 @@
     "url": "git@github.com:maxogden/csv-write-stream.git"
   },
   "author": "max ogden",
-  "license": "BSD",
+  "license": "BSD-2-Clause",
   "dependencies": {
     "argparse": "^1.0.7",
     "generate-object-property": "^1.0.0",
