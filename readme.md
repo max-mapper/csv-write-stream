@@ -80,6 +80,27 @@ This module also includes a CLI, which you can pipe [ndjson](http://ndjson.org)
 to stdin and it will print csv on stdout. You can install it with
 `npm install -g csv-write-stream`.
 
+```bash
+$ csv-write --help
+usage: csv-write [-h] [-v] [--separator SEPARATOR] [--newline NEWLINE]
+                 [--headers HEADERS [HEADERS ...]] [--no-send-headers]
+
+
+A CSV encoder stream that produces properly escaped CSVs. JSON is read from
+STDIN, formatted to CSV, and written to STDOUT.
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  -v, --version         Show program's version number and exit.
+  --separator SEPARATOR
+                        The separator character to use. Defaults to ','.
+  --newline NEWLINE     The newline character to use. Defaults to $'\n'.
+  --headers HEADERS [HEADERS ...]
+                        The list of headers to use. If omitted, the keys of
+                        the first row written to STDIN will be used
+  --no-send-headers     Don't print the header row.
 ```
-cat example.ndjson | csv-write-stream > example.csv
+
+```bash
+$ cat example.ndjson | csv-write > example.csv
 ```
