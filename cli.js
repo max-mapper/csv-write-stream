@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 var csv = require('./')
-var fs = require('fs')
 var minimist = require('minimist')
 var ndj = require('ndjson')
 
