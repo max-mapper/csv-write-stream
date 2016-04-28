@@ -8,20 +8,20 @@ A CSV encoder stream that produces properly escaped CSVs.
 
 A through stream. Write arrays of strings (or JS objects) and you will receive a properly escaped CSV stream out the other end.
 
-### usage
+## usage
 
-##### var writer = csvWriter([options])
+### var writer = csvWriter([options])
 
-```js
+```javascript
 var csvWriter = require('csv-write-stream')
 var writer = csvWriter()
 ```
 
 `writer` is a duplex stream -- you can pipe data to it and it will emit a string for each line of the CSV
 
-#### default options
+### default options
 
-```js
+```javascript
 {
   separator: ',',
   newline: '\n',
@@ -34,7 +34,7 @@ var writer = csvWriter()
 
 example of auto headers:
 
-```js
+```javascript
 var writer = csvWriter()
 writer.pipe(fs.createWriteStream('out.csv'))
 writer.write({hello: "world", foo: "bar", baz: "taco"})
@@ -45,7 +45,7 @@ writer.end()
 
 example of specifying headers:
 
-```js
+```javascript
 var writer = csvWriter({ headers: ["hello", "foo"]})
 writer.pipe(fs.createWriteStream('out.csv'))
 writer.write(['world', 'bar'])
@@ -56,7 +56,7 @@ writer.end()
 
 example of not sending headers:
 
-```js
+```javascript
 var writer = csvWriter({sendHeaders: false})
 writer.pipe(fs.createWriteStream('out.csv'))
 writer.write({hello: "world", foo: "bar", baz: "taco"})
@@ -67,19 +67,38 @@ writer.end()
 
 see the test suite for more examples
 
-### run the test suite
+## run the test suite
 
 ```bash
 $ npm install
 $ npm test
 ```
 
-### cli usage
+## cli usage
 
-This module also includes a CLI, which you can pipe [ndjson](http://ndjson.org) 
-to stdin and it will print csv on stdout. You can install it with 
-`npm install -g csv-write-stream`.
+This module also includes a CLI, which you can pipe [ndjson](http://ndjson.org) to stdin and it will print csv on stdout. You can install it with `npm install -g csv-write-stream`.
 
+```bash
+$ csv-write --help
+usage: csv-write [-h] [-v] [--separator SEPARATOR] [--newline NEWLINE]
+                 [--headers HEADERS [HEADERS ...]] [--no-send-headers]
+
+
+A CSV encoder stream that produces properly escaped CSVs. JSON is read from
+STDIN, formatted to CSV, and written to STDOUT.
+
+Optional arguments:
+  -h, --help            Show this help message and exit.
+  -v, --version         Show program's version number and exit.
+  --separator SEPARATOR
+                        The separator character to use. Defaults to ','.
+  --newline NEWLINE     The newline character to use. Defaults to $'\n'.
+  --headers HEADERS [HEADERS ...]
+                        The list of headers to use. If omitted, the keys of
+                        the first row written to STDIN will be used
+  --no-send-headers     Don't print the header row.
 ```
-cat example.ndjson | csv-write-stream > example.csv
+
+```bash
+$ cat example.ndjson | csv-write > example.csv
 ```
