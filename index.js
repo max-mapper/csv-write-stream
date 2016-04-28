@@ -9,6 +9,7 @@ var CsvWriteStream = function(opts) {
   this.sendHeaders = opts.sendHeaders !== false
   this.headers = opts.headers || null
   this.separator = opts.separator || opts.seperator || ','
+  this.sendMetadata = !!opts.sendMetadata
   this.newline = opts.newline || '\n'
 
   this._objRow = null
@@ -65,6 +66,7 @@ CsvWriteStream.prototype._transform = function(row, enc, cb) {
     this._objRow = this._compile(objProps)
     this._arrRow = this._compile(arrProps)
 
+    if (this.sendMetadata) this.push('sep=' + this.separator + this.newline)
     if (this.sendHeaders) this.push(this._arrRow(this.headers))
   }
 
