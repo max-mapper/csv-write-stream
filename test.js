@@ -86,15 +86,16 @@ test('encode from object w/ auto headers', function(t) {
   writer.end()
 })
 
-test('no headers specified', function(t) {
+test('no headers specified w/ arrays', function(t) {
   var writer = csv()
 
-  writer.on('error', function(err) {
-    t.equal(err.message, 'no headers specified')
+  writer.pipe(concat(function(data) {
+    t.equal('foo,bar\nfoo,bar\n', data.toString())
     t.end()
-  })
+  }))
 
   writer.write(['foo', 'bar'])
+  writer.write(['foo', 'bar', 'baz'])
   writer.end()
 })
 

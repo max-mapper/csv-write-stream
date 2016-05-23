@@ -48,7 +48,12 @@ CsvWriteStream.prototype._compile = function(headers) {
 CsvWriteStream.prototype._transform = function(row, enc, cb) {
   var isArray = Array.isArray(row)
 
-  if (!isArray && !this.headers) this.headers = Object.keys(row)
+  if (!this.headers) {
+    this.headers = Object.keys(row)
+    if (isArray) {
+      this.sendHeaders = false;
+    }
+  } 
 
   if (this._first && this.headers) {
     this._first = false
