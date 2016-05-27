@@ -55,7 +55,6 @@ CsvWriteStream.prototype._transform = function(row, enc, cb) {
 
     var objProps = []
     var arrProps = []
-    var heads = []
 
     for (var i = 0; i < this.headers.length; i++) {
       arrProps.push('obj['+i+']')
