@@ -32,7 +32,7 @@ CsvWriteStream.prototype._compile = function(headers) {
     return 'a'+i
   })
 
-  for (var i = 0; i < headers.length; i += 500) { // do not overflowi the callstack on lots of cols
+  for (var i = 0; i < headers.length; i += 500) { // do not overflow the callstack on lots of cols
     var part = headers.length < 500 ? headers : headers.slice(i, i + 500)
     str += i ? 'result += "'+sep+'" + ' : 'var result = '
     part.forEach(function(prop, j) {
