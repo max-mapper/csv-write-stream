@@ -51,19 +51,23 @@ CsvWriteStream.prototype._transform = function(row, enc, cb) {
 
   if (!isArray && !this.headers) this.headers = Object.keys(row)
 
-  if (this._first && this.headers) {
+  if (this._first) {
     this._first = false
-
     var objProps = []
     var arrProps = []
-    var heads = []
 
-    for (var i = 0; i < this.headers.length; i++) {
-      arrProps.push('obj['+i+']')
-      objProps.push(gen('obj', this.headers[i]))
+    if (this.headers) {
+      for (var i = 0; i < this.headers.length; i++) {
+        arrProps.push('obj['+i+']')
+        objProps.push(gen('obj', this.headers[i]))
+      }
+      this._objRow = this._compile(objProps)
+    } else {
+      for (var j = 0; j < row.length; j++) {
+        arrProps.push('obj['+j+']')
+      }
+      this.sendHeaders = false;
     }
-
-    this._objRow = this._compile(objProps)
     this._arrRow = this._compile(arrProps)
 
     if (this.sendMetadata) this.push('sep=' + this.separator + this.newline)
@@ -71,9 +75,9 @@ CsvWriteStream.prototype._transform = function(row, enc, cb) {
   }
 
   if (isArray) {
-    if (!this.headers) return cb(new Error('no headers specified'))
     this.push(this._arrRow(row))
   } else {
+    if (!this.headers) return cb(new Error('no headers specified for object after the first element'))
     this.push(this._objRow(row))
   }
 
