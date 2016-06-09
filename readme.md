@@ -26,7 +26,8 @@ var writer = csvWriter()
   separator: ',',
   newline: '\n',
   headers: undefined,
-  sendHeaders: true
+  sendHeaders: true,
+  sendMetadata: false
 }
 ```
 
