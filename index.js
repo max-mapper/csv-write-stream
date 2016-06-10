@@ -8,7 +8,8 @@ var CsvWriteStream = function(opts) {
 
   this.sendHeaders = opts.sendHeaders !== false
   this.headers = opts.headers || null
-  this.separator = opts.separator || opts.seperator || ','
+  this.separator = opts.separator === undefined || opts.separator === null ? ',' : opts.separator
+  this.sendMetadata = !!opts.sendMetadata
   this.newline = opts.newline || '\n'
 
   this._objRow = null
@@ -31,7 +32,7 @@ CsvWriteStream.prototype._compile = function(headers) {
     return 'a'+i
   })
 
-  for (var i = 0; i < headers.length; i += 500) { // do not overflowi the callstack on lots of cols
+  for (var i = 0; i < headers.length; i += 500) { // do not overflow the callstack on lots of cols
     var part = headers.length < 500 ? headers : headers.slice(i, i + 500)
     str += i ? 'result += "'+sep+'" + ' : 'var result = '
     part.forEach(function(prop, j) {
@@ -42,7 +43,8 @@ CsvWriteStream.prototype._compile = function(headers) {
 
   str += 'return result +'+JSON.stringify(newline)+'\n}'
 
-  return new Function('esc', 'return '+str)(esc)
+  var escape = sep === '' ? noEsc : esc;
+  return new Function('esc', 'return '+str)(escape)
 }
 
 CsvWriteStream.prototype._transform = function(row, enc, cb) {
@@ -50,28 +52,33 @@ CsvWriteStream.prototype._transform = function(row, enc, cb) {
 
   if (!isArray && !this.headers) this.headers = Object.keys(row)
 
-  if (this._first && this.headers) {
+  if (this._first) {
     this._first = false
-
     var objProps = []
     var arrProps = []
-    var heads = []
 
-    for (var i = 0; i < this.headers.length; i++) {
-      arrProps.push('obj['+i+']')
-      objProps.push(gen('obj', this.headers[i]))
+    if (this.headers) {
+      for (var i = 0; i < this.headers.length; i++) {
+        arrProps.push('obj['+i+']')
+        objProps.push(gen('obj', this.headers[i]))
+      }
+      this._objRow = this._compile(objProps)
+    } else {
+      for (var j = 0; j < row.length; j++) {
+        arrProps.push('obj['+j+']')
+      }
+      this.sendHeaders = false;
     }
-
-    this._objRow = this._compile(objProps)
     this._arrRow = this._compile(arrProps)
 
+    if (this.sendMetadata && this.separator) this.push('sep=' + this.separator + this.newline)
     if (this.sendHeaders) this.push(this._arrRow(this.headers))
   }
 
   if (isArray) {
-    if (!this.headers) return cb(new Error('no headers specified'))
     this.push(this._arrRow(row))
   } else {
+    if (!this.headers) return cb(new Error('no headers specified for object after the first element'))
     this.push(this._objRow(row))
   }
 
@@ -96,4 +103,7 @@ module.exports = function(opts) {
 
 function esc(cell) {
   return '"'+cell.replace(/"/g, '""')+'"'
+}
+function noEsc(cell) {
+  return cell;
 }
