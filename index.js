@@ -8,7 +8,7 @@ var CsvWriteStream = function(opts) {
 
   this.sendHeaders = opts.sendHeaders !== false
   this.headers = opts.headers || null
-  this.separator = opts.separator || opts.seperator || ','
+  this.separator = opts.separator === undefined || opts.separator === null ? ',' : opts.separator
   this.sendMetadata = !!opts.sendMetadata
   this.newline = opts.newline || '\n'
 
@@ -43,7 +43,8 @@ CsvWriteStream.prototype._compile = function(headers) {
 
   str += 'return result +'+JSON.stringify(newline)+'\n}'
 
-  return new Function('esc', 'return '+str)(esc)
+  var escape = sep === '' ? noEsc : esc;
+  return new Function('esc', 'return '+str)(escape)
 }
 
 CsvWriteStream.prototype._transform = function(row, enc, cb) {
@@ -70,7 +71,7 @@ CsvWriteStream.prototype._transform = function(row, enc, cb) {
     }
     this._arrRow = this._compile(arrProps)
 
-    if (this.sendMetadata) this.push('sep=' + this.separator + this.newline)
+    if (this.sendMetadata && this.separator) this.push('sep=' + this.separator + this.newline)
     if (this.sendHeaders) this.push(this._arrRow(this.headers))
   }
 
@@ -102,4 +103,7 @@ module.exports = function(opts) {
 
 function esc(cell) {
   return '"'+cell.replace(/"/g, '""')+'"'
+}
+function noEsc(cell) {
+  return cell;
 }
