@@ -6,6 +6,7 @@ var CsvWriteStream = function(opts) {
   if (!opts) opts = {}
   stream.Transform.call(this, {objectMode:true, highWaterMark:16})
 
+  this.mapHeaders = opts.mapHeaders || function(header) { return header }
   this.sendHeaders = opts.sendHeaders !== false
   this.headers = opts.headers || null
   this.separator = opts.separator || opts.seperator || ','
@@ -51,6 +52,18 @@ CsvWriteStream.prototype._transform = function(row, enc, cb) {
   if (!isArray && !this.headers) this.headers = Object.keys(row)
 
   if (this._first && this.headers) {
+
+    var printedHeaders = [];
+
+    for (var i = 0; i < this.headers.length; i++) {
+      var key = this.headers[i]
+      var printedHeader = this.mapHeaders(key, i)
+      printedHeaders.push(printedHeader)
+      if (typeof printedHeader !== 'string') {
+        this.headers[i] = null
+      }
+    }
+
     this._first = false
 
     var objProps = []
@@ -58,14 +71,15 @@ CsvWriteStream.prototype._transform = function(row, enc, cb) {
     var heads = []
 
     for (var i = 0; i < this.headers.length; i++) {
-      arrProps.push('obj['+i+']')
-      objProps.push(gen('obj', this.headers[i]))
+      if (this.headers[i] !== null) {
+        arrProps.push('obj['+i+']')
+        objProps.push(gen('obj', this.headers[i]))
+      }
     }
 
     this._objRow = this._compile(objProps)
     this._arrRow = this._compile(arrProps)
-
-    if (this.sendHeaders) this.push(this._arrRow(this.headers))
+    if (this.sendHeaders) this.push(this._arrRow(printedHeaders || this.headers))
   }
 
   if (isArray) {
