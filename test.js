@@ -86,6 +86,56 @@ test('encode from object w/ auto headers', function(t) {
   writer.end()
 })
 
+test('encode from object w/ auto headers and one header skipped', function(t) {
+  var writer = csv({
+    mapHeaders: function (header) {
+      return header !== 'foo' ? header : null
+    }
+  })
+
+  writer.pipe(concat(function(data) {
+    t.equal(data.toString(), 'hello,baz\nworld,taco\n')
+    t.end()
+  }))
+
+  writer.write({hello: "world", foo: "bar", baz: "taco"})
+  writer.end()
+})
+
+test('encode from object w/ auto headers and change the header', function(t) {
+  var writer = csv({
+    mapHeaders: function (header) {
+      return header !== 'foo' ? header : 'Foo'
+    }
+  })
+
+  writer.pipe(concat(function(data) {
+    t.equal(data.toString(), 'hello,Foo,baz\nworld,bar,taco\n')
+    t.end()
+  }))
+
+  writer.write({hello: "world", foo: "bar", baz: "taco"})
+  writer.end()
+})
+
+test('encode from object edit header and filter one column', function(t) {
+  var writer = csv({
+    headers: ['hello', 'foo', 'baz'],
+    mapHeaders: function (header) {
+      return header === 'foo' ? null
+          : header.substring(0,1).toUpperCase() + header.substring(1)
+    }
+  })
+
+  writer.pipe(concat(function(data) {
+    t.equal(data.toString(), 'Hello,Baz\nworld,taco\n')
+    t.end()
+  }))
+
+  writer.write(["world", "bar", "taco"])
+  writer.end()
+})
+
 test('no headers specified', function(t) {
   var writer = csv()
 
