@@ -12,6 +12,7 @@
   "dependencies": {
     "argparse": "^1.0.7",
     "generate-object-property": "^1.0.0",
+    "legacy-encoding": "^3.0.0",
     "ndjson": "^1.3.0"
   },
   "devDependencies": {
