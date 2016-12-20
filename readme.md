@@ -26,7 +26,8 @@ var writer = csvWriter()
   separator: ',',
   newline: '\n',
   headers: undefined,
-  sendHeaders: true
+  sendHeaders: true,
+  encoding: 'UTF-8'
 }
 ```
 
@@ -96,6 +97,8 @@ Optional arguments:
   --headers HEADERS [HEADERS ...]
                         The list of headers to use. If omitted, the keys of
                         the first row written to STDIN will be used
+  --encoding ENCODING   The encoding to use for the output. Defaults to
+                        'UTF-8'.
   --no-send-headers     Don't print the header row.
 ```
 

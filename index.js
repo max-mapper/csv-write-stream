@@ -1,6 +1,7 @@
 var stream = require('stream')
 var util = require('util')
 var gen = require('generate-object-property')
+var legacy = require('legacy-encoding')
 
 var CsvWriteStream = function(opts) {
   if (!opts) opts = {}
@@ -10,6 +11,7 @@ var CsvWriteStream = function(opts) {
   this.headers = opts.headers || null
   this.separator = opts.separator || opts.seperator || ','
   this.newline = opts.newline || '\n'
+  this.encoding = opts.encoding.toUpperCase() || 'UTF-8'
 
   this._objRow = null
   this._arrRow = null
@@ -22,6 +24,7 @@ util.inherits(CsvWriteStream, stream.Transform)
 CsvWriteStream.prototype._compile = function(headers) {
   var newline = this.newline
   var sep = this.separator
+  var enc = this.encoding
   var str = 'function toRow(obj) {\n'
 
   if (!headers.length) str += '""'
@@ -35,14 +38,18 @@ CsvWriteStream.prototype._compile = function(headers) {
     var part = headers.length < 500 ? headers : headers.slice(i, i + 500)
     str += i ? 'result += "'+sep+'" + ' : 'var result = '
     part.forEach(function(prop, j) {
-      str += (j ? '+"'+sep+'"+' : '') + '(/['+sep+'\\r\\n"]/.test('+prop+') ? esc('+prop+'+"") : '+prop+')'
+      var propEnc = prop
+      if (enc !== 'UTF-8') {
+        propEnc = 'encode('+prop+', "'+enc.replace('"', '\\\"')+'")'
+      }
+      str += (j ? '+"'+sep+'"+' : '') + '(/['+sep+'\\r\\n"]/.test('+prop+') ? esc('+propEnc+'+"") : '+propEnc+')'
     })
     str += '\n'
   }
 
   str += 'return result +'+JSON.stringify(newline)+'\n}'
 
-  return new Function('esc', 'return '+str)(esc)
+  return new Function('esc', 'encode', 'return '+str)(esc, encode)
 }
 
 CsvWriteStream.prototype._transform = function(row, enc, cb) {
@@ -92,6 +99,10 @@ CsvWriteStream.prototype.destroy = function (err) {
 
 module.exports = function(opts) {
   return new CsvWriteStream(opts)
+}
+
+function encode(cell, enc) {
+  return legacy.encode(cell, enc)
 }
 
 function esc(cell) {

@@ -24,6 +24,10 @@ argparser.addArgument(['--headers'], {
   help: 'The list of headers to use. If omitted, the keys of the first row ' +
   'written to STDIN will be used',
 })
+argparser.addArgument(['--encoding'], {
+  help: "The encoding to use for the output. Defaults to 'UTF-8'.",
+  defaultValue: 'UTF-8'
+})
 argparser.addArgument(['--no-send-headers'], {
   action: 'storeFalse',
   help: "Don't print the header row.",
