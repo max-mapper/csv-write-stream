@@ -26,11 +26,14 @@ var writer = csvWriter()
   separator: ',',
   newline: '\n',
   headers: undefined,
-  sendHeaders: true
+  sendHeaders: true,
+  enclose: false,
 }
 ```
 
 `headers` can be an array of strings to use as the header row. if you don't specify a header row the keys of the first row written to the stream will be used as the header row IF the first row is an object (see the test suite for more details). if the `sendHeaders` option is set to false, the headers will be used for ordering the data but will never be written to the stream.
+
+`enclose` is a boolean. If true, then it will force enclosing with double quotes all the fields. If false, it will use enclosing with double quotes only if it is necessary.
 
 example of auto headers:
 

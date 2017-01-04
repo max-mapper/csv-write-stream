@@ -86,6 +86,18 @@ test('encode from object w/ auto headers', function(t) {
   writer.end()
 })
 
+test('enclose values', function(t) {
+  var writer = csv({enclose: true})
+
+  writer.pipe(concat(function(data) {
+    t.equal('"hello","foo","baz"\n"world","bar","ta""co"\n', data.toString())
+    t.end()
+  }))
+
+  writer.write({hello: "world", foo: "bar", baz: 'ta"co'})
+  writer.end()
+})
+
 test('no headers specified', function(t) {
   var writer = csv()
 
