@@ -4,7 +4,7 @@ var gen = require('generate-object-property')
 
 var CsvWriteStream = function(opts) {
   if (!opts) opts = {}
-  stream.Transform.call(this, {objectMode:true, highWaterMark:16})
+  stream.Transform.call(this, {readableObjectMode:false, writableObjectMode:true, encoding:'utf8'})
 
   this.sendHeaders = opts.sendHeaders !== false
   this.headers = opts.headers || null
