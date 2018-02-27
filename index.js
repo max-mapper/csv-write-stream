@@ -4,7 +4,7 @@ var gen = require('generate-object-property')
 
 var CsvWriteStream = function(opts) {
   if (!opts) opts = {}
-  stream.Transform.call(this, {objectMode:true, highWaterMark:16})
+  stream.Transform.call(this, {readableObjectMode:false, writableObjectMode:true, encoding:'utf8'})
 
   this.sendHeaders = opts.sendHeaders !== false
   this.headers = opts.headers || null
@@ -76,6 +76,28 @@ CsvWriteStream.prototype._transform = function(row, enc, cb) {
   }
 
   cb()
+}
+
+CsvWriteStream.prototype._flush = function (cb) {
+  if (this._first && this.headers) {
+    this._first = false
+
+    var objProps = []
+    var arrProps = []
+    var heads = []
+
+    for (var i = 0; i < this.headers.length; i++) {
+      arrProps.push('obj['+i+']')
+      objProps.push(gen('obj', this.headers[i]))
+    }
+
+    this._objRow = this._compile(objProps)
+    this._arrRow = this._compile(arrProps)
+
+    if (this.sendHeaders) this.push(this._arrRow(this.headers))
+  }
+
+  cb();
 }
 
 CsvWriteStream.prototype.destroy = function (err) {
