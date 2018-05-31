@@ -10,6 +10,7 @@ var CsvWriteStream = function(opts) {
   this.headers = opts.headers || null
   this.separator = opts.separator || opts.seperator || ','
   this.newline = opts.newline || '\n'
+  this.enclose = opts.enclose || false
 
   this._objRow = null
   this._arrRow = null
@@ -22,6 +23,7 @@ util.inherits(CsvWriteStream, stream.Transform)
 CsvWriteStream.prototype._compile = function(headers) {
   var newline = this.newline
   var sep = this.separator
+  var enclose = this.enclose
   var str = 'function toRow(obj) {\n'
 
   if (!headers.length) str += '""'
@@ -35,7 +37,11 @@ CsvWriteStream.prototype._compile = function(headers) {
     var part = headers.length < 500 ? headers : headers.slice(i, i + 500)
     str += i ? 'result += "'+sep+'" + ' : 'var result = '
     part.forEach(function(prop, j) {
-      str += (j ? '+"'+sep+'"+' : '') + '(/['+sep+'\\r\\n"]/.test('+prop+') ? esc('+prop+'+"") : '+prop+')'
+      if (!enclose) {
+        str += (j ? '+"'+sep+'"+' : '') + '(/['+sep+'\\r\\n"]/.test('+prop+') ? esc('+prop+'+"") : '+prop+')'
+      } else {
+        str += (j ? '+"'+sep+'"+' : '') + 'esc('+prop+'+"")'
+      }
     })
     str += '\n'
   }
