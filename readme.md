@@ -32,6 +32,8 @@ var writer = csvWriter()
 
 `headers` can be an array of strings to use as the header row. if you don't specify a header row the keys of the first row written to the stream will be used as the header row IF the first row is an object (see the test suite for more details). if the `sendHeaders` option is set to false, the headers will be used for ordering the data but will never be written to the stream.
 
+`headers` can also be an array of objects containing a header title, field and default. The `title` will replace the field in header. The `field` defines the object key. The `default` set the default value if a key is not found in a given row.
+
 example of auto headers:
 
 ```javascript
@@ -63,6 +65,25 @@ writer.write({hello: "world", foo: "bar", baz: "taco"})
 writer.end()
 
 // produces: world,bar,taco\n
+```
+
+example of with headers objects (title, field and defaults):
+note: header objects does not work in the cli.
+
+```javascript
+var headers = [
+  { title: 'SSN', field: 'ssn_value', default: 'NA'},
+  { title: 'First Name', field: 'fName', default: ''},
+  { title: 'Last Name', field: 'lName', default: ''}
+]
+var writer = csvWriter({ headers: headers })
+writer.pipe(fs.createWriteStream('out.csv'))
+writer.write({ fName: 'Joe', lName: 'Dirt', ssn_value: '111-22-3333'})
+writer.end()
+
+// produces:
+// SSN,First Name,Last Name\n
+// 000-11-0000,Joe,Dirt\n
 ```
 
 see the test suite for more examples
