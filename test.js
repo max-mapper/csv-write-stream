@@ -170,3 +170,58 @@ test('lots of cols', function (t) {
   writer.write(obj)
   writer.end()
 })
+
+test('header objects', function(t) {
+
+  var headers = [
+    { title: 'My Foo', field: 'foo' },
+    { title: 'My Bar', field: 'bar' }
+  ]
+
+  var writer = csv({ headers: headers })
+
+  writer.pipe(concat(function(data) {
+    t.equal('My Foo,My Bar\nfoo,bar\n', data.toString())
+    t.end()
+  }))
+
+  writer.write({ foo: 'foo', bar: 'bar' })
+  writer.end()
+})
+
+test('header objects with basic array', function(t) {
+
+  var headers = [
+    { title: 'My Foo', field: 'foo' },
+    { title: 'My Bar', field: 'bar' }
+  ]
+
+  var writer = csv({ headers: headers })
+
+  writer.pipe(concat(function(data) {
+    t.equal('My Foo,My Bar\nfoo,bar\n', data.toString())
+    t.end()
+  }))
+
+  writer.write(["foo", "bar"])
+  writer.end()
+})
+
+test('header objects with default with basic array', function(t) {
+
+  var headers = [
+    { title: 'My Foo', field: 'foo' },
+    { title: 'My Bar', field: 'bar' },
+    { title: 'My Bad', field: 'bad', default: '--' }
+  ]
+
+  var writer = csv({ headers: headers })
+
+  writer.pipe(concat(function(data) {
+    t.equal('My Foo,My Bar,My Bad\nfoo,bar,--\n', data.toString())
+    t.end()
+  }))
+
+  writer.write(["foo", "bar"])
+  writer.end()
+})

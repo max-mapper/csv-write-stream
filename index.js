@@ -4,7 +4,7 @@ var gen = require('generate-object-property')
 
 var CsvWriteStream = function(opts) {
   if (!opts) opts = {}
-  stream.Transform.call(this, {objectMode:true, highWaterMark:16})
+  stream.Transform.call(this, { objectMode:true, highWaterMark:16 })
 
   this.sendHeaders = opts.sendHeaders !== false
   this.headers = opts.headers || null
@@ -25,9 +25,15 @@ CsvWriteStream.prototype._compile = function(headers) {
   var str = 'function toRow(obj) {\n'
 
   if (!headers.length) str += '""'
+  var rawheaders = this.headers;
 
   headers = headers.map(function(prop, i) {
-    str += 'var a'+i+' = '+prop+' == null ? "" : '+prop+'\n'
+    if (typeof rawheaders[i] === 'object') {
+       var def = rawheaders[i].default || ''
+       str += 'var a'+i+' = '+prop+' == null ? "'+def+'" : '+prop+'\n'
+    } else {
+        str += 'var a'+i+' = '+prop+' == null ? "" : '+prop+'\n'
+    }
     return 'a'+i
   })
 
@@ -58,14 +64,22 @@ CsvWriteStream.prototype._transform = function(row, enc, cb) {
     var heads = []
 
     for (var i = 0; i < this.headers.length; i++) {
-      arrProps.push('obj['+i+']')
-      objProps.push(gen('obj', this.headers[i]))
+
+      if (typeof this.headers[i] === 'object') {
+        arrProps.push('obj['+i+']')
+        objProps.push(gen('obj', this.headers[i].field))
+        heads.push(this.headers[i].title || this.headers[i].field)
+      } else {
+        arrProps.push('obj['+i+']')
+        objProps.push(gen('obj', this.headers[i]))
+        heads.push(this.headers[i])
+      }
     }
 
     this._objRow = this._compile(objProps)
     this._arrRow = this._compile(arrProps)
 
-    if (this.sendHeaders) this.push(this._arrRow(this.headers))
+    if (this.sendHeaders) this.push(this._arrRow(heads))
   }
 
   if (isArray) {
