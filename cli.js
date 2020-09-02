@@ -37,3 +37,7 @@ process.stdin
   .pipe(ndj.parse())
   .pipe(csv(args))
   .pipe(process.stdout)
+  .on('error', err => {
+    if (err.code === 'EPIPE') return
+    throw err
+  })
